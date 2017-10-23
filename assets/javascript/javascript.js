@@ -138,10 +138,10 @@ $(document).ready(function(){
     var playerName = $("#name").val();
     rps.createPlayer(playerName);
   });
-  rps.getTurn();
-  var firstChoice;
-  var secondChoice;
-    rps.whoseTurn = snap.val();
+  database.ref("turn").on("value", function(snapshot){
+    var firstChoice;
+    var secondChoice;
+    rps.whoseTurn = snapshot.val();
     if (rps.whoseTurn === 1){
       $("#player1-space").on("click", ".weapons1", function(){
         firstChoice = $(this).html().toLowerCase();
@@ -162,5 +162,6 @@ $(document).ready(function(){
         rps.setTurn(1);
       });
     }
+  });
 });
 
