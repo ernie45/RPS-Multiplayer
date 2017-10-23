@@ -1,3 +1,17 @@
+.forBorder{
+	border-style: solid;
+	border-width: 1px;
+	height: 250px;
+	margin-top: 25px;
+	margin-bottom:25px;
+	background-color: white;
+}
+#commentBox{
+	border-style: solid;
+	border-width: 1px;
+	height: 250px;
+	background-color: white;
+}
 body{
-	background-color: black;
+	background-color: green;
 }

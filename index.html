@@ -4,10 +4,11 @@
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 	<script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+  <link rel="stylesheet" href="assets/css/style.css">
 	<title></title>
 </head>
-<body>
 	<div class="row text-center">
+<body>
 		<h1 class="text-center">ROCK, PAPER, SCISSORS</h1>
 	</div>
 	<div class="row">
@@ -59,158 +60,5 @@
 		</div>
 	</div>
 </body>
-<script>
-	// Initialize Firebase
-$(document).ready(function(){
-	var player1Chosen = false;
-	var player2Chosen = false;
-	var player1;
-	var player2;
-	var config = {
-    	apiKey: "AIzaSyA3mwHQnmG8mtyoFAlQWHvbuUYLVASNs6E",
-    	authDomain: "rock-paper-scissors-ca2af.firebaseapp.com",
-    	databaseURL: "https://rock-paper-scissors-ca2af.firebaseio.com",
-    	projectId: "rock-paper-scissors-ca2af",
-    	storageBucket: "rock-paper-scissors-ca2af.appspot.com",
-    	messagingSenderId: "113923101424"
-  	};
-  	firebase.initializeApp(config);
-
-
-
-
-
-
-
-
-
-
-
-  	var database = firebase.database();
-
-
-  	$("#begin").on("click", function(){
-  		var name = $("#name").val().trim();
-  		console.log(name);
-  		var newPlayer = {
-  			name: name,
-  			wins: 0,
-  			losses: 0
-  		};
-  		database.ref("/players").push(newPlayer);
-  	});
-
-
-  	database.ref("/players").on("child_added", function(snapshot){
-  		if (!player2Chosen){
-  				if (player1Chosen){
-  					var number = "2";
-  					deployWeapons($("#player2-space"), snapshot.val(), number);
-  					$("#player2").text(snapshot.val().name);
-  					player2Chosen = true;
-  					$("#gameProgress").text("Game On");
-            database.ref("/turn").set(1);
-  				}
-  				else{
-  					var number = "1";
-  					player1Chosen = true;
-  					deployWeapons($("#player1-space"), snapshot.val(), number);
-  					$("#player1").text(snapshot.val().name);
-  					$("#gameProgress").html("<h1>Waiting on Player2</h1>");
-				}
-		  }
-  	}, function(errorObject){
-  		console.log(errorObject.code);
-  	});
-    database.ref("/turn").on("value", function(snapshot){
-      if (snapshot.val() === 1){
-        $("#player1-space").on("click", ".weapons1", function(){
-          console.log($(this).text());
-          database.ref("/turn").set(2);
-        });
-      }
-      else if(snapshot.val() === 2){
-        $("#player2-space").on("click", ".weapons2", function(){
-          console.log($(this).text());
-          database.ref("/turn").set(1);
-        });
-      }
-    }, function(errorObject) {
-      console.log("Errors handled: " + errorObject.code);
-    });
-    $("#send").on("click", function(){
-      var insultDiv = $("<div>");
-      var insult = $("#insult").val().trim();
-      insultDiv.html(insult);
-      $("#commentBox").append(insultDiv);
-    });
-});
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function checkAttack(one, two){
-	if (one.toLowerCase() === "rock" && two.toLowerCase() === "scissors"){
-		return true;
-	}
-	else if (one.toLowerCase() === "scissors" && two.toLowerCase() === "paper"){
-		return true; 
-	}
-	else if (one.toLowerCase() === "paper" && two.toLowerCase() === "rock"){
-		return true;
-	}
-	else{
-		return false;
-	}
-};
-  	function deployWeapons(area, player, number){
-  		var weapons = $("<div>").attr("id", "weaponsDiv" + number);
-  		var rock = $("<div>ROCK</div>").attr("id", "rockDiv" + number);
-  		rock.addClass("weapons" + number);
-  		var paper = $("<div>PAPER</div>").attr("id", "paperDiv" + number);
-  		paper.addClass("weapons" + number);
-  		var scissors = $("<div>SCISSORS</div>").attr("id", "scissorsDiv" + number);
-  		scissors.addClass("weapons" + number);
-  		weapons.append(rock);
-  		weapons.append(paper);
-  		weapons.append(scissors);
-  		area.append(weapons);
-  		var winLoss = $("<div>Wins: " + player.wins + " Losses: " + player.losses + "</div>");
-  		area.append(winLoss);
-  	};
-</script>
+<script src="assets/javascript/javascript.js"></script>
 </html>
