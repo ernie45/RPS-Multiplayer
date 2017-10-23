@@ -63,7 +63,7 @@ var rps = {
     database.ref("turn").on("value", function(snapshot){
       rps.whoseTurn = snapshot.val();
     });
-  }
+  },
   //CHECKS WHOSE TURN IT IS
   deployWeapons: function(playerNumber){
     var playerSpace = $("#player" + playerNumber + "-space");
@@ -130,7 +130,7 @@ var rps = {
     database.ref("players/one/losses").set(rps.oneLosses);
     database.ref("players/two/wins").set(rps.twoWins);
   }
-  
+
 };
 //MAIN APP CONTENT////////////////////////////////////////////////////////////////////////////////////////////////
 $(document).ready(function(){
