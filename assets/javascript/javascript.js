@@ -39,7 +39,6 @@ var rps = {
         rps.getName();
         rps.player2Chosen = true;
         rps.secondPlayer = name;
-        $("#player2").html(rps.firstName);
         rps.deployWeapons("2");
         rps.setTurn(1);
         $("#gameProgress").html("<h1>GAME ON</h1>");
@@ -55,7 +54,6 @@ var rps = {
         database.ref("ties").set(rps.ties);
         rps.player1Chosen = true;
         rps.firstPlayer = name;
-        $("#player1").html(rps.secondName);
         rps.deployWeapons("1");
         $("#gameProgress").html("<h1>WAITING ON PLAYER2</h1>");
       }
@@ -65,6 +63,8 @@ var rps = {
     database.ref("players").on("value", function(snapshot){
       rps.firstName = snapshot.val().one.name;
       rps.secondName = snapshot.val().two.name;
+      $("#player1").html(snapshot.val().one.name);
+      $("#player2").html(snapshot.val().two.name);
     });
   },
   //SET WHOSE TURN IT IS
@@ -189,6 +189,9 @@ var rps = {
 };
 //MAIN APP CONTENT////////////////////////////////////////////////////////////////////////////////////////////////
 $(document).ready(function(){
+  database.ref().on("value", function){
+    console.log(snapshot.val());
+  }
   rps.getName();
   $("#begin").on("click", function(){
     var playerName = $("#name").val();
