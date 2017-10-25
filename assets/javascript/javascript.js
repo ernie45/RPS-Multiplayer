@@ -226,7 +226,7 @@ $(document).ready(function(){
     $("#losses1").html(snapshot.val().players.one.losses);
     $("#ties1").html(snapshot.val().ties);
     $("#wins2").html(snapshot.val().players.two.wins);
-    $("#wins2").html(snapshot.val().players.two.wins);
+    $("#losses2").html(snapshot.val().players.two.losses);
     $("#ties2").html(snapshot.val().ties);
   });
 });
