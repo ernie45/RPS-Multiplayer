@@ -151,7 +151,7 @@ var rps = {
       $("#player1-space").empty();
       $("#player2-space").empty(); 
     }
-  }
+  },
   setChat: function(text){
     database.ref("chat").set(text);
     rps.getChat();
