@@ -90,14 +90,9 @@ var rps = {
     scissors.addClass("weapons" + playerNumber);
     scissors.attr("id", "scissorsDiv" + playerNumber);
     scissors.html("SCISSORS");
-    var status = $("<div>");
-    status.addClass("status" + playerNumber);
-    status.attr("id", "statusDiv" + playerNumber);
-    status.html("Wins: 0, Losses: 0, Ties: 0");
     weaponsWrapper.append(rock);
     weaponsWrapper.append(paper);
     weaponsWrapper.append(scissors);
-    weaponsWrapper.append(status);
     playerSpace.prepend(weaponsWrapper);
   },
   queryChoice: function(choice, playerString){
@@ -112,7 +107,6 @@ var rps = {
     });
   },
   checkAttack: function(){
-    rps.retreiveChoices();
     console.log("firstChoice: " + rps.firstChoice + " secondChoice: " + rps.secondChoice);
     if((rps.firstChoice === "rock" && rps.secondChoice === "scissors") || 
       (rps.firstChoice === "paper" && rps.secondChoice === "rock") ||
@@ -130,8 +124,6 @@ var rps = {
       rps.oneLosses++;
       rps.winner = 2;
     }
-    rps.queryWinsLossesTies();
-    rps.displayWinsLossesTies();
     console.log("The winner is: " + rps.winner); 
   },
   queryWinsLossesTies: function(){
@@ -140,23 +132,6 @@ var rps = {
     database.ref("ties").set(rps.ties);
     database.ref("players/one/losses").set(rps.oneLosses);
     database.ref("players/two/wins").set(rps.twoWins);
-    rps.getWinsLossesTies();
-  },
-  getWinsLossesTies: function(){
-    database.ref().on("value", function(snapshot){
-      var snap = snapshot.val().players;
-      rps.oneWins = snap.one.wins;
-      rps.oneLosses = snap.one.losses;
-      rps.twoWins = snap.two.wins;
-      rps.twoLosses = snap.two.losses;
-      rps.ties = snap.ties;
-    }, function(errorObject){
-      console.log("Errors handled: " + errorObject.code);
-    });
-  },
-  displayWinsLossesTies: function(){
-    $("#statusDiv1").html("Wins: " + rps.oneWins + " Losses: " + rps.oneLosses + " Ties: " + rps.ties);
-    $("#statusDiv2").html("Wins: " + rps.twoWins + " Losses: " + rps.twoLosses + " Ties: " + rps.ties);
   },
   displayProgress: function(){
     if (rps.winner === 1){
@@ -222,10 +197,20 @@ $(document).ready(function(){
         var choice = $(this).html();
         rps.queryChoice(choice.toLowerCase(), "two");
         $("#player2-space").off("click", ".weapons2");
+        rps.retreiveChoices();
         rps.checkAttack();
+        rps.queryWinsLossesTies();
         rps.setTurn(1);
       });
     }
   });
+  database.ref().on("value", function(snapshot){
+      $("#wins1").html(snapshot.val().players.one.wins);
+      $("#losses1").html(snapshot.val().players.one.losses);
+      $("#ties1").html(snapshot.val().ties);
+      $("#wins2").html(snapshot.val().players.two.wins);
+      $("#wins2").html(snapshot.val().players.two.wins);
+      $("#ties2").html(snapshot.val().ties);
+    });
 });
 
