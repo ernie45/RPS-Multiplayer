@@ -12,6 +12,9 @@
 	height: 250px;
 	background-color: white;
 }
+.status{
+	margin-bottom: 0px;
+}
 body{
 	background-color: green;
 }
