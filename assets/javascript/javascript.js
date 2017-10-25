@@ -186,16 +186,9 @@ $(document).ready(function(){
   /** Listen for changes in player whether they connect or disconnect,
       If they connect, take their name, if disconnect, remove from game
       Also listen to values in the database to display persistently*/
-  database.ref().on("value", function(snapshot){
-    $("#wins1").html(snapshot.val().players.one.wins);
-    $("#losses1").html(snapshot.val().players.one.losses);
-    $("#ties1").html(snapshot.val().ties);
-    $("#wins2").html(snapshot.val().players.two.wins);
-    $("#wins2").html(snapshot.val().players.two.wins);
-    $("#ties2").html(snapshot.val().ties);
-
-    $("#player1").html(snapshot.val().players.one.name);
-    $("#player2").html(snapshot.val().players.two.name);
+  database.ref("players").on("value", function(snapshot){
+    $("#player1").html(snapshot.val().one.name);
+    $("#player2").html(snapshot.val().two.name);
     database.ref("players/one").onDisconnect().remove();
     database.ref("players/two").onDisconnect().remove();
   }, function(errorObject) {
@@ -227,6 +220,14 @@ $(document).ready(function(){
     }
   }, function(errorObject){
     console.log("Errors handled: " + errorObject.code);
+  });
+  database.ref().on("value", function(snapshot){
+    $("#wins1").html(snapshot.val().players.one.wins);
+    $("#losses1").html(snapshot.val().players.one.losses);
+    $("#ties1").html(snapshot.val().ties);
+    $("#wins2").html(snapshot.val().players.two.wins);
+    $("#wins2").html(snapshot.val().players.two.wins);
+    $("#ties2").html(snapshot.val().ties);
   });
 });
 
