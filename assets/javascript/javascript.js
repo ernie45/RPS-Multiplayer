@@ -10,72 +10,67 @@ firebase.initializeApp(config);
 var database = firebase.database();
 //GAME OBJECT WITH FUNCTIONS TO CALL THAT ARE RELATED TO THE GAME
 var rps = {
-  firstName: "",
-  secondName: "",
-  whoseTurn: "",
+  numberOfPlayersConnected: 0,
+  firstPlayer: "",
+  secondPlayer: "",
   oneWins: 0,
+  firstChoice: "",
+  secondChoice: "",
   oneLosses: 0,
   twoWins: 0,
   twoLosses: 0,
   ties: 0,
-  player2Chosen: false,
-  player1Chosen: false,
-  firstPlayer: "",
-  secondPlayer: "",
-  firstChoice: "",
-  secondChoice: "",
   winner: 0,
   chatText: "",
   //INITIALIZE PLAYERS/////////////////////////////////////////////////////////////////////////////////////////////
   createPlayer: function(name){
-    if (!rps.player2Chosen){
-      if (rps.player1Chosen){
-        database.ref("players/two").set({
-          name: name,
-          wins: 0,
-          losses: 0,
-          choice: ""
-        });
-        rps.getName();
-        rps.player2Chosen = true;
-        rps.secondPlayer = name;
-        rps.deployWeapons("2");
-        rps.setTurn(1);
-        $("#gameProgress").html("<h1>GAME ON</h1>");
-      }
-      else{
+    rps.checkForSpace();
+    if (rps.numberOfPlayersConnected < 2){
+      if (rps.numberOfPlayersConnected === 0){
         database.ref("players/one").set({
           name: name,
           wins: 0,
           losses: 0,
           choice: ""
         });
-        rps.getName();
-        database.ref("ties").set(rps.ties);
-        rps.player1Chosen = true;
         rps.firstPlayer = name;
         rps.deployWeapons("1");
         $("#gameProgress").html("<h1>WAITING ON PLAYER2</h1>");
       }
+        else if (rps.numberOfPlayersConnected === 1){
+          database.ref("players/two").set({
+            name: name,
+            wins: 0,
+            losses: 0,
+            choice: ""
+          });
+          rps.secondPlayer = name;
+          database.ref("ties").set(rps.ties);
+          rps.secondPlayer = name;
+          rps.deployWeapons("2");
+          rps.setTurn(1);
+          $("#gameProgress").html("<h1>GAME ON</h1>");
+        }
     }
   },
-  getName: function(){
+  checkForSpace: function(){
     database.ref("players").on("value", function(snapshot){
-      rps.firstName = snapshot.val().one.name;
-      rps.secondName = snapshot.val().two.name;
-      $("#player1").html(snapshot.val().one.name);
-      $("#player2").html(snapshot.val().two.name);
+      if (snapshot.numChildren() === 1){
+        rps.numberOfPlayersConnected = 1;
+      }
+      else if (snapshot.numChildren() === 2){
+        rps.numberOfPlayersConnected = 2;
+      }
+      else{
+        rps.numberOfPlayersConnected = 0;
+      }
+    }, function(errorObject){
+      console.log("Errors handled: " + errorObject.code);
     });
   },
   //SET WHOSE TURN IT IS
   setTurn: function(playerNumber){
     database.ref("turn").set(playerNumber);
-    rps.getTurn();
-  },
-  getTurn: function(){
-    database.ref("turn").on("value", function(snapshot){
-      rps.whoseTurn = snapshot.val();
-    });
   },
   //CHECKS WHOSE TURN IT IS
   deployWeapons: function(playerNumber){
@@ -107,18 +102,18 @@ var rps = {
   },
   queryChoice: function(choice, playerString){
     database.ref("players/" + playerString + "/choice").set(choice);
-    rps.retreiveChoices();
-  },
-  displayChoice: function(choice, playerNumber){
-    $("#player" + playerNumber + "-space").html("<h1>" + choice + "</h1>");
   },
   retreiveChoices: function(){
     database.ref("players").on("value", function(snapshot){
       rps.firstChoice = snapshot.val().one.choice;
       rps.secondChoice = snapshot.val().two.choice;
+    }, function(errorObject){
+      console.log("Errors handled: " + errorObject.code);
     });
   },
   checkAttack: function(){
+    rps.retreiveChoices();
+    console.log("firstChoice: " + rps.firstChoice + " secondChoice: " + rps.secondChoice);
     if((rps.firstChoice === "rock" && rps.secondChoice === "scissors") || 
       (rps.firstChoice === "paper" && rps.secondChoice === "rock") ||
       (rps.firstChoice === "scissors" && rps.secondChoice === "paper")){
@@ -136,10 +131,8 @@ var rps = {
       rps.winner = 2;
     }
     rps.queryWinsLossesTies();
-  },
-  displayWinsLossesTies: function(){
-    $("#statusDiv1").html("Wins: " + rps.oneWins + " Losses: " + rps.oneLosses + " Ties: " + rps.ties);
-    $("#statusDiv2").html("Wins: " + rps.twoWins + " Losses: " + rps.twoLosses + " Ties: " + rps.ties);
+    rps.displayWinsLossesTies();
+    console.log("The winner is: " + rps.winner); 
   },
   queryWinsLossesTies: function(){
     database.ref("players/one/wins").set(rps.oneWins);
@@ -147,17 +140,23 @@ var rps = {
     database.ref("ties").set(rps.ties);
     database.ref("players/one/losses").set(rps.oneLosses);
     database.ref("players/two/wins").set(rps.twoWins);
-    rps.getWinsLossesTies;
+    rps.getWinsLossesTies();
   },
   getWinsLossesTies: function(){
     database.ref().on("value", function(snapshot){
       var snap = snapshot.val().players;
-      rps.oneWins = snap.one.Wins;
-      rps.oneLosses = snap.one.Losses;
-      rps.twoWins = snap.two.Wins;
-      rps.twoLosses = snap.two.Losses;
+      rps.oneWins = snap.one.wins;
+      rps.oneLosses = snap.one.losses;
+      rps.twoWins = snap.two.wins;
+      rps.twoLosses = snap.two.losses;
       rps.ties = snap.ties;
+    }, function(errorObject){
+      console.log("Errors handled: " + errorObject.code);
     });
+  },
+  displayWinsLossesTies: function(){
+    $("#statusDiv1").html("Wins: " + rps.oneWins + " Losses: " + rps.oneLosses + " Ties: " + rps.ties);
+    $("#statusDiv2").html("Wins: " + rps.twoWins + " Losses: " + rps.twoLosses + " Ties: " + rps.ties);
   },
   displayProgress: function(){
     if (rps.winner === 1){
@@ -177,6 +176,8 @@ var rps = {
   getChat: function(){
     database.ref("chat").on("value", function(snapshot){
       rps.chatText = snapshot.val();
+    }, function(errorObject){
+      console.log("Errors handled: " + errorObject.code);
     });
     rps.displayChat();
   },
@@ -187,44 +188,41 @@ var rps = {
     $("#commentBox").append(chatDiv);
   }
 };
-//MAIN APP CONTENT////////////////////////////////////////////////////////////////////////////////////////////////
+//MAIN APP CONTENT///////////////////////////////////////////////////////////////////////////////////////////////
 $(document).ready(function(){
-  database.ref().on("value", function){
-    console.log(snapshot.val());
-  }
-  rps.getName();
-  $("#begin").on("click", function(){
-    var playerName = $("#name").val();
-    rps.createPlayer(playerName);
+  $("#begin").on("click", function(event){
+    event.preventDefault();
+    var name = $("#name").val().trim();
+    rps.createPlayer(name);
   });
-  $("#send").on("click", function(){
-    var text = $("#insult").val();
-    rps.setChat(text);
-    console.log(rps.chatText);
+  /** Listen for changes in player whether they connect or disconnect,
+      If they connect, take their name, if disconnect, remove from game*/
+  database.ref("players").on("value", function(snapshot){
+    $("#player1").html(snapshot.val().one.name);
+    $("#player2").html(snapshot.val().two.name);
+    database.ref("players/one").onDisconnect().remove();
+    database.ref("players/two").onDisconnect().remove();
+  }, function(errorObject) {
+      console.log("Errors handled: " + errorObject.code);
   });
+  /** Listen for whose turn it is  
+      If player1's turn, activate it's weapons listener and query the choice, and change the turn to 2*/
   database.ref("turn").on("value", function(snapshot){
-    var firstChoice;
-    var secondChoice;
-    rps.whoseTurn = snapshot.val();
-    if (rps.whoseTurn === 1){
+    /** Handle player1's move */
+    if (snapshot.val() === 1){
       $("#player1-space").on("click", ".weapons1", function(){
-        firstChoice = $(this).html().toLowerCase();
-        rps.queryChoice(firstChoice, "one");
-        rps.displayChoice(firstChoice.toUpperCase(), "1");
+        var choice = $(this).html();
+        rps.queryChoice(choice.toLowerCase(), "one");
         $("#player1-space").off("click", ".weapons1");
         rps.setTurn(2);
-        rps.retreiveChoices();
       });
     }
-    else if (rps.whoseTurn === 2){
+    else if (snapshot.val() === 2){
       $("#player2-space").on("click", ".weapons2", function(){
-        secondChoice = $(this).html().toLowerCase();
-        rps.queryChoice(secondChoice, "two");
+        var choice = $(this).html();
+        rps.queryChoice(choice.toLowerCase(), "two");
         $("#player2-space").off("click", ".weapons2");
-        rps.deployWeapons("1");
         rps.checkAttack();
-        rps.displayWinsLossesTies();
-        rps.displayProgress();
         rps.setTurn(1);
       });
     }
